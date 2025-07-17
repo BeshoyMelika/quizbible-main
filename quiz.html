@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة تخمين الإيموجي الكتابية</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font for a sleeker look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e0f2fe;
+            /* Light blue background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .game-container {
+            background-color: #ffffff;
+            /* White card background */
+            border-radius: 20px;
+            /* Rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            /* Soft shadow */
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .emoji-display {
+            font-size: 3.5rem;
+            /* Large emojis */
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            /* Allow emojis to wrap on smaller screens */
+            gap: 10px;
+            /* Space between emojis */
+            min-height: 80px;
+            /* Ensure consistent height */
+        }
+
+        .verse-display {
+            font-size: 1.2rem;
+            color: #333;
+            background-color: #f0f9ff;
+            /* Very light blue for verse background */
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #bfdbfe;
+            /* Light blue border */
+            text-align: justify;
+            /* Justify text for better readability */
+            line-height: 1.6;
+        }
+
+        .button {
+            padding: 12px 25px;
+            border-radius: 15px;
+            /* Rounded buttons */
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+
+        .button-primary {
+            background-color: #3b82f6;
+            /* Blue */
+            color: white;
+        }
+
+        .button-primary:hover:not(:disabled) {
+            background-color: #2563eb;
+            /* Darker blue on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .button-secondary {
+            background-color: #bfdbfe;
+            /* Light blue */
+            color: #1e40af;
+            /* Darker blue text */
+        }
+
+        .button-secondary:hover:not(:disabled) {
+            background-color: #93c5fd;
+            /* Even lighter blue on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            /* Allow buttons to wrap on small screens */
+        }
+
+        .title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #1e40af;
+            /* Dark blue for title */
+            margin-bottom: 20px;
+        }
+
+        .question-counter {
+            font-size: 1rem;
+            color: #60a5fa;
+            /* Medium blue for counter */
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 640px) {
+            .game-container {
+                padding: 20px;
+                border-radius: 15px;
+            }
+
+            .emoji-display {
+                font-size: 2.2rem;
+                /* Adjusted emoji size for mobile */
+            }
+
+            .verse-display {
+                font-size: 1rem;
+                padding: 15px;
+            }
+
+            .button {
+                padding: 10px 20px;
+                font-size: 1rem;
+                border-radius: 12px;
+            }
+
+            .title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <h1 class="title">لعبة تخمين الآية الكتابية</h1>
+        <div class="question-counter" id="questionCounter"></div>
+        <div class="emoji-display" id="emojiDisplay"></div>
+        <div class="button-group">
+            <button id="prevQuestionBtn" class="button button-secondary">السؤال السابق</button>
+            <button id="showVerseBtn" class="button button-primary">إظهار الآية</button>
+            <button id="nextQuestionBtn" class="button button-secondary">السؤال التالي</button>
+        </div>
+        <div class="verse-display" id="verseDisplay" style="display: none;"></div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                emojis: "🌎 🧂 👉",
+                verse: "انتم ملح الأرض .. مت ٥:١٣"
+            },
+            {
+                emojis: "🌎 🙏 🎤 🎶 🌎 🙏 🎤 🎶 🗣️",
+                verse: "سبحوا الرب يا كل الأمم حمدوه يا كل الشعوب .. مز ١١٧:١"
+            },
+            {
+                emojis: "🤝 ✝️ ❓ ⛰️➡️  👀☝️",
+                verse: "رفعت عيني إلى الجبال من حيث يأتي عوني .. مز ١٢١:١"
+            },
+            {
+                emojis: " 🐍⛔ 🙏✨ 👀🌙",
+                verse: "اسهروا وصلوا لئلا تدخلوا في تجربة .. مت ٢٦:٤١"
+            },
+            {
+                emojis: "📖 🔍",
+                verse: "فتشوا الكتب .. يو ٥:٣٩"
+            },
+            {
+                emojis: "💬👄 🫀⛲",
+                verse: "من فضلة القلب يتكلم الفم .. مت ١٢:٣٤"
+            },
+            {
+                emojis: "🚶‍♂️🚶‍♀️  ⛪  🗣️👥   😊",
+                verse: "فرحت بالقائلين لي إلى بيت الرب نذهب .. مز ١٢٢:١"
+            },
+            {
+                emojis: "👑💫  👁️👁️ 🌍  👤➡️📜",
+                verse: "الكلمة صار جسداً وحل بيننا ورأينا مجده .. يو ١٤:١"
+            },
+            {
+                emojis: "🛣️💡 📜🦶🕯️ ",
+                verse: "سراج لرجلي كلامك ونور لسبيلي .. مز ١١٩:١٠٥"
+            },
+            {
+                emojis: "👑📜🔊  👤🕊️  🍚🚫",
+                // emojis: "🚫🍚  🕊️👤  🔊📜👑",
+                verse: "ليس بالخبز وحده يحيا الإنسان بل بكل كلمة تخرج من فم الله .. مت ٤:٤"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        const emojiDisplay = document.getElementById('emojiDisplay');
+        const verseDisplay = document.getElementById('verseDisplay');
+        const showVerseBtn = document.getElementById('showVerseBtn');
+        const nextQuestionBtn = document.getElementById('nextQuestionBtn');
+        const prevQuestionBtn = document.getElementById('prevQuestionBtn');
+        const questionCounter = document.getElementById('questionCounter');
+
+        // Function to display the current question
+        function displayQuestion() {
+            if (currentQuestionIndex >= 0 && currentQuestionIndex < questions.length) {
+                const q = questions[currentQuestionIndex];
+                emojiDisplay.textContent = q.emojis;
+                verseDisplay.textContent = q.verse;
+                verseDisplay.style.display = 'none'; // Always hide verse when changing questions
+                showVerseBtn.style.display = 'inline-block'; // Always show "Show Verse" button
+
+                // Enable/disable navigation buttons
+                prevQuestionBtn.disabled = (currentQuestionIndex === 0);
+                nextQuestionBtn.disabled = (currentQuestionIndex === questions.length - 1);
+
+                questionCounter.textContent = `السؤال ${currentQuestionIndex + 1} من ${questions.length}`;
+            } else if (currentQuestionIndex === questions.length) {
+                // End of game state
+                emojiDisplay.textContent = "انتهت اللعبة! شكراً لمشاركتكم.";
+                verseDisplay.textContent = "";
+                verseDisplay.style.display = 'none';
+                showVerseBtn.style.display = 'none';
+                prevQuestionBtn.style.display = 'none';
+                nextQuestionBtn.style.display = 'none';
+                questionCounter.textContent = "";
+            }
+            // Handle case if currentQuestionIndex goes below 0 (shouldn't happen with disabled button)
+            else if (currentQuestionIndex < 0) {
+                currentQuestionIndex = 0; // Reset to first question
+                displayQuestion();
+            }
+        }
+
+        // Event listener for "Show Verse" button
+        showVerseBtn.addEventListener('click', () => {
+            verseDisplay.style.display = 'block'; // Show the verse
+        });
+
+        // Event listener for "Next Question" button
+        nextQuestionBtn.addEventListener('click', () => {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        });
+
+        // Event listener for "Previous Question" button
+        prevQuestionBtn.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        });
+
+        // Initialize the game when the window loads
+        window.onload = displayQuestion;
+    </script>
+</body>
+
+</html>
